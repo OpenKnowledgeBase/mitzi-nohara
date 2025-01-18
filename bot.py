@@ -19,7 +19,6 @@ def process_income(message):
     except ValueError:
         bot.reply_to(message, "Invalid input. Please enter a number.")
 
-# Command to add expenses
 @bot.message_handler(commands=['addexpense'])
 def add_expense(message):
     msg = bot.reply_to(message, "Enter your expense amount:")
