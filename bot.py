@@ -1,11 +1,14 @@
+import os
 import telebot
 from telebot import types
-bot = telebot.TeleBot("7806377242:AAHhyhyWlOPJspmbn1eh4rA8eKSinf710js")
+BOT_TOKEN = os.getenv('BOT_TOKEN', '7806377242:AAHhyhyWlOPJspmbn1eh4rA8eKSinf710js')
+bot = telebot.TeleBot(BOT_TOKEN)
 user_data = {}
 @bot.message_handler(commands=['start'])
 def start(message):
     user_data[message.chat.id] = {"income": 0, "expenses": []}
     bot.reply_to(message, "Welcome to the Smart Budget Tracker Bot! Use /addincome to add income, /addexpense to add expenses, and /report to generate a report.")
+
 @bot.message_handler(commands=['addincome'])
 def add_income(message):
     msg = bot.reply_to(message, "Enter your income amount:")
@@ -34,11 +37,14 @@ def process_expense(message):
 
 @bot.message_handler(commands=['report'])
 def generate_report(message):
-    income = user_data[message.chat.id]["income"]
-    expenses = sum(user_data[message.chat.id]["expenses"])
-    remaining_budget = income - expenses
-    report = f"Income: ${income}\nTotal Expenses: ${expenses}\nRemaining Budget: ${remaining_budget}"
-    bot.reply_to(message, report)
+    if message.chat.id in user_data:
+        income = user_data[message.chat.id]["income"]
+        expenses = sum(user_data[message.chat.id]["expenses"])
+        remaining_budget = income - expenses
+        report = f"Income: ${income}\nTotal Expenses: ${expenses}\nRemaining Budget: ${remaining_budget}"
+        bot.reply_to(message, report)
+    else:
+        bot.reply_to(message, "No data found. Please use /start to initialize your data.")
 @bot.message_handler(commands=['help'])
 def help(message):
     help_text = """
@@ -51,4 +57,8 @@ def help(message):
     """
     bot.reply_to(message, help_text)
 
-bot.polling()
+if __name__ == "__main__":
+    try:
+        bot.polling(none_stop=True)
+    except Exception as e:
+        print(f"An error occurred: {e}")
